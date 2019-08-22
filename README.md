@@ -1,2 +1,2 @@
-# demo_bankaccount
+# Demo: Bank Account
 Bank account management demo app.
