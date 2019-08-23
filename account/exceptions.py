@@ -6,3 +6,8 @@ from rest_framework.exceptions import APIException
 class ForbiddenWithdrawException(APIException):
     status_code = status.HTTP_403_FORBIDDEN
     default_detail = 'Invalid withdraw amount.'
+
+
+class InsufficientBalanceException(APIException):
+    status_code = status.HTTP_403_FORBIDDEN
+    default_detail = 'Insufficient balance.'

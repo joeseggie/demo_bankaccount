@@ -1,9 +1,13 @@
+from uuid import UUID
+
 from django.db.models import Sum
 from django.utils.datetime_safe import datetime
 from rest_framework import permissions
+from rest_framework.generics import get_object_or_404
 
 from account.exceptions import ForbiddenWithdrawException
-from account.models import Transaction
+from account.exceptions import InsufficientBalanceException
+from account.models import Transaction, Account
 from common.constants import WITHDRAW_THRESHOLD
 
 
@@ -30,3 +34,14 @@ class MaximumWithdrawPermission(permissions.BasePermission):
                 return True
 
         raise ForbiddenWithdrawException
+
+
+class InsufficientBalancePermission(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        withdraw_amount: int = int(request.data['amount'])
+        account_id: UUID = UUID(request.data['account_id'])
+        account: Account = get_object_or_404(Account, pk=account_id)
+        if withdraw_amount > account.balance:
+            raise InsufficientBalanceException
+        return True

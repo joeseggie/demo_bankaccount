@@ -10,7 +10,7 @@ class AccountTestCase(APITestCase):
         self.account_obj = Account.objects.create(
             first_name='Joseph',
             last_name='Serunjogi',
-            account_number='0001112223231'
+            account_number='0001112223231',
         )
 
     def test_account_balance(self):
@@ -29,6 +29,9 @@ class AccountTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_account_withdraw(self):
+        self.account_obj.balance = 10000
+        self.account_obj.save()
+
         response = self.client.post(
             reverse('account-withdraw'),
             {
@@ -47,6 +50,7 @@ class AccountTestCase(APITestCase):
                 'amount': 120000
             })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data['detail'], 'Invalid withdraw amount.')
 
     def test_account_withdraw_exceeding_maximum_in_a_day(self):
         Transaction.objects.create(
@@ -62,3 +66,18 @@ class AccountTestCase(APITestCase):
                 'amount': 90000
             })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data['detail'], 'Invalid withdraw amount.')
+
+    def test_insufficient_balance_withdraw(self):
+        self.account_obj.balance = 0
+        self.account_obj.save()
+
+        response = self.client.post(
+            reverse('account-withdraw'),
+            {
+                'account_id': self.account_obj.id,
+                'transaction_type': 'withdraw',
+                'amount': 90000
+            })
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data['detail'], 'Insufficient balance.')
