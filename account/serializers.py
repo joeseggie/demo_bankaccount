@@ -3,11 +3,11 @@ from account.models import Account
 from account.models import Transaction
 
 
-class AccountSerializer(serializers.ModelSerializer):
+class BalanceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ['first_name', 'last_name', 'account_number']
+        fields = ['account_number', 'first_name', 'last_name', 'balance']
 
 
 class TransactionSerializer(serializers.ModelSerializer):

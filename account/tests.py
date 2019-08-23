@@ -1,5 +1,5 @@
 from rest_framework.test import APITestCase
-from account.models import Account
+from account.models import Account, Transaction
 from rest_framework.reverse import reverse
 from rest_framework import status
 
@@ -45,5 +45,20 @@ class AccountTestCase(APITestCase):
                 'account_id': self.account_obj.id,
                 'transaction_type': 'withdraw',
                 'amount': 120000
+            })
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_account_withdraw_exceeding_maximum_in_a_day(self):
+        Transaction.objects.create(
+            account=self.account_obj,
+            transaction_type='withdraw',
+            amount=90000)
+
+        response = self.client.post(
+            reverse('account-withdraw'),
+            {
+                'account_id': self.account_obj.id,
+                'transaction_type': 'withdraw',
+                'amount': 90000
             })
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
